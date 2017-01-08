@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+				{
+			"checksumSHA1": "W5+6JLo37NSFBOXumlmDWsWdd1k=",
+			"path": "github.com/fulr/spidev",
+			"revision": "524e13e3fac291abb9aefcf65e5d925da312b6a1",
+			"revisionTime": "2015-02-10T16:55:49Z"
+		}
+	],
+	"rootPath": "github.com/floreks/led-max7219-client"
+}
