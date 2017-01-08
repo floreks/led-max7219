@@ -36,16 +36,46 @@ type Max7219 struct {
 }
 
 // Init device and Max7219 driver
-func (this Max7219) Init() {
-	this.Command(MAX7219_REG_SCANLIMIT, 7)   // show all 8 digits
+func (this Max7219) Init() error {
+	err := this.Command(MAX7219_REG_SCANLIMIT, 7)   // show all 8 digits
+	if err != nil {
+		return err
+	}
+
 	this.Command(MAX7219_REG_DECODEMODE, 0)  // use matrix (not digits)
+	if err != nil {
+		return err
+	}
+
 	this.Command(MAX7219_REG_DISPLAYTEST, 0) // no display test
+	if err != nil {
+		return err
+	}
+
 	this.Command(MAX7219_REG_SHUTDOWN, 1)    // not shutdown mode
-	this.Command(MAX7219_REG_INTENSITY, 7)   // Set brightness (0-15)
+	if err != nil {
+		return err
+	}
+
+	this.Command(MAX7219_REG_INTENSITY, 0)   // Set brightness (0-15)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (this Max7219) SetBrightness(value int) {
+	brightness := value
+	if brightness < 0 || brightness > 15 {
+		brightness = 7
+	}
+
+	this.Command(MAX7219_REG_INTENSITY, byte(brightness))
 }
 
 func (this Max7219) Command(reg Max7219Reg, value byte) error {
-	buf := []byte{byte(reg), value}
+	buf := []byte{byte(reg), value, byte(reg), value}
 
 	_, err := this.device.Xfer(buf)
 	if err != nil {

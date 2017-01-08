@@ -68,7 +68,13 @@ func main() {
 	dev, err := device.NewMax7219()
 	if err != nil {
 		log.Printf("Error during device creation: %s", err.Error())
-		return
+		os.Exit(1)
+	}
+
+	err = dev.Init()
+	if err != nil {
+		log.Printf("Error during device init: %s", err.Error())
+		os.Exit(1)
 	}
 
 	defer dev.Close()
