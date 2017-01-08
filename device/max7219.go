@@ -101,8 +101,32 @@ func (this Max7219) DisplayTemperature(temperature float32) error {
 	return nil
 }
 
-func (this Max7219) DisplayAlcoholConcentration(perMilles float32) {
+func (this Max7219) DisplayAlcoholConcentration(perMilles float32) error {
+	// Round to integer number as we don't have space for floating point numbers
+	if perMilles < 1.0 {
+		perMilles *= 10
+	}
 
+	display := int(perMilles)
+
+	buf, err := DEFAULT_FONT.FromInt(display)
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < MAX7219_DIGIT_COUNT; i++ {
+		// Add dot to indicate floating point number on first device (row/col) 7/8
+		if i == 6 {
+			buf[0][i] |= 1
+		}
+
+		err := this.send(Max7219Reg(i), buf[1][i], buf[0][i])
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (this Max7219) Close() {

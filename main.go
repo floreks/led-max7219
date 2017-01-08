@@ -59,12 +59,7 @@ func main() {
 
 	registerSigtermHandler(dev)
 
-	dev.ClearDisplay()
 	for temp := range tempChan {
 		dev.DisplayTemperature(temp)
-	}
-
-	for _, b := range device.DEFAULT_FONT[0] {
-		fmt.Printf("%b\n", b)
 	}
 }
