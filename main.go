@@ -2,9 +2,10 @@ package main
 
 import (
 	"github.com/floreks/led-max7219-client/device"
+	"github.com/spf13/pflag"
 
 	"encoding/json"
-	"fmt"
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -17,18 +18,24 @@ type TempResponse struct {
 	Temperature float32 `json:"temperature"`
 }
 
-const tempServerUrl = "http://192.168.0.100:30024/ds18b20"
 const POLLING_TIME = 5 * time.Second
 
-func pollTemperature(tempChan chan float32) {
+func pollTemperature(pollServer *string, tempChan chan float32) {
+	tempResponse := new(TempResponse)
+
 	for {
-		tempResponse := new(TempResponse)
-		r, err := http.Get(tempServerUrl)
+		r, err := http.Get(*pollServer)
 		if err != nil {
 			log.Printf("Error durring temperature polling: %s", err.Error())
+			os.Exit(1)
 		}
 
-		json.NewDecoder(r.Body).Decode(tempResponse)
+		err = json.NewDecoder(r.Body).Decode(tempResponse)
+		if err != nil {
+			log.Printf("Error during server response decoding: %s", err.Error())
+			os.Exit(1)
+		}
+
 		tempChan <- tempResponse.Temperature
 		time.Sleep(POLLING_TIME)
 		r.Body.Close()
@@ -45,21 +52,36 @@ func registerSigtermHandler(dev *device.Max7219) {
 	}()
 }
 
+var (
+	pollServer = pflag.String("poll-server", "", "Server address that should be used for polling data")
+)
+
 func main() {
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+
+	if *pollServer == "" {
+		log.Printf("Poll server not defined. Please specify server to poll data from.")
+		os.Exit(1)
+	}
+
 	dev, err := device.NewMax7219()
 	if err != nil {
-		fmt.Printf("Error during device creation: %s", err.Error())
+		log.Printf("Error during device creation: %s", err.Error())
 		return
 	}
 
 	defer dev.Close()
 
 	tempChan := make(chan float32)
-	go pollTemperature(tempChan)
+	go pollTemperature(pollServer, tempChan)
 
 	registerSigtermHandler(dev)
 
 	for temp := range tempChan {
-		dev.DisplayTemperature(temp)
+		err := dev.DisplayTemperature(temp)
+		if err != nil {
+			log.Fatalf("Error during attempt to display temperature: %s", err.Error())
+		}
 	}
 }
