@@ -2,11 +2,17 @@
 	"comment": "",
 	"ignore": "test",
 	"package": [
-				{
+		{
 			"checksumSHA1": "W5+6JLo37NSFBOXumlmDWsWdd1k=",
 			"path": "github.com/fulr/spidev",
 			"revision": "524e13e3fac291abb9aefcf65e5d925da312b6a1",
 			"revisionTime": "2015-02-10T16:55:49Z"
+		},
+		{
+			"checksumSHA1": "KekibwUA0VhM5I4QjyPgFNWRW3k=",
+			"path": "github.com/smalllixin/bitarray",
+			"revision": "f792a6032f31558bca8b96eb298bbe5c3eada280",
+			"revisionTime": "2014-01-16T16:02:08Z"
 		}
 	],
 	"rootPath": "github.com/floreks/led-max7219-client"
